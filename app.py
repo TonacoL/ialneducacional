@@ -1,10 +1,9 @@
-from flask import Flask, request
-import requests
 import openai
 import os
+from flask import Flask, request
+import requests
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente
 load_dotenv()
 
 app = Flask(__name__)
@@ -16,32 +15,27 @@ def responder():
     data = request.json
     print("Recebido no webhook:", data)
 
-    if not data:
-        return {"error": "Nenhum dado JSON recebido"}, 400
-
     mensagem_cliente = data.get('text', {}).get('message')
     telefone_cliente = data.get('phone')
 
     if not mensagem_cliente or not telefone_cliente:
-        return {"error": "Dados incompletos: 'message' e 'phone' são necessários"}, 400
+        return {"error": "Dados incompletos"}, 400
 
     try:
         resposta = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Você é uma atendente virtual carinhosa e profissional. "
-                        "Responda sempre com empatia e clareza. Não passe valores. "
-                        "Coleta as seguintes informações: tipo de trabalho, prazo, norma, dúvidas, etc. "
-                        "Depois, diga que a equipe humana dará continuidade."
-                    )
-                },
+                {"role": "system", "content": (
+                    "Você é uma atendente virtual carinhosa e profissional. "
+                    "Responda sempre com empatia e clareza. Não passe valores. "
+                    "Coleta as seguintes informações: tipo de trabalho, prazo, norma, dúvidas, etc. "
+                    "Depois, diga que a equipe humana dará continuidade."
+                )},
                 {"role": "user", "content": mensagem_cliente}
             ]
         )
         resposta_texto = resposta.choices[0].message.content
+
     except Exception as e:
         print(f"Erro na OpenAI: {e}")
         resposta_texto = (
