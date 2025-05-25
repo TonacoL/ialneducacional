@@ -19,8 +19,9 @@ def responder():
     if not data:
         return {"error": "Nenhum dado JSON recebido"}, 400
 
-    mensagem_cliente = data.get('message')
-    telefone_cliente = data.get('phone')
+mensagem_cliente = data.get('text', {}).get('message')
+telefone_cliente = data.get('phone')
+
 
     if not mensagem_cliente or not telefone_cliente:
         return {"error": "Dados incompletos: 'message' e 'phone' são necessários"}, 400
