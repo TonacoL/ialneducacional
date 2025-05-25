@@ -44,10 +44,12 @@ def responder():
         )
 
     try:
-        requests.post(ZAPI_URL, json={
+        envio = requests.post(ZAPI_URL, json={
             "phone": telefone_cliente,
             "message": resposta_texto
         })
+        print("Resposta do envio WhatsApp:", envio.status_code, envio.text)
+
     except Exception as e:
         print(f"Erro ao enviar mensagem para WhatsApp: {e}")
 
