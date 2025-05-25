@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 ZAPI_URL = os.getenv('ZAPI_URL')
 
 @app.route('/webhook', methods=['POST'])
@@ -26,7 +26,7 @@ def responder():
         return {"error": "Dados incompletos: 'message' e 'phone' são necessários"}, 400
 
     try:
-        resposta = openai.ChatCompletion.create(
+        resposta = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {
@@ -41,7 +41,7 @@ def responder():
                 {"role": "user", "content": mensagem_cliente}
             ]
         )
-        resposta_texto = resposta['choices'][0]['message']['content']
+        resposta_texto = resposta.choices[0].message.content
     except Exception as e:
         print(f"Erro na OpenAI: {e}")
         resposta_texto = (
