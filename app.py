@@ -1,4 +1,3 @@
-
 from flask import Flask, request
 import requests
 import openai
@@ -15,11 +14,16 @@ ZAPI_URL = os.getenv('ZAPI_URL')
 @app.route('/webhook', methods=['POST'])
 def responder():
     data = request.json
+    print("Recebido no webhook:", data)  # DEBUG: log da requisição
+
+    if not data:
+        return {"error": "Nenhum dado JSON recebido"}, 400
+
     mensagem_cliente = data.get('message')
     telefone_cliente = data.get('phone')
 
     if not mensagem_cliente or not telefone_cliente:
-        return {"error": "Dados incompletos"}, 400
+        return {"error": "Dados incompletos: 'message' e 'phone' são necessários"}, 400
 
     try:
         resposta = openai.ChatCompletion.create(
@@ -27,7 +31,12 @@ def responder():
             messages=[
                 {
                     "role": "system",
-                    "content": "Você é uma atendente virtual carinhosa e profissional. Responda sempre com empatia e clareza. Não passe valores. Coleta as seguintes informações: tipo de trabalho, prazo, norma, dúvidas, etc. Depois, diga que a equipe humana vai dar continuidade."
+                    "content": (
+                        "Você é uma atendente virtual carinhosa e profissional. "
+                        "Responda sempre com empatia e clareza. Não passe valores. "
+                        "Coleta as seguintes informações: tipo de trabalho, prazo, norma, dúvidas, etc. "
+                        "Depois, diga que a equipe humana vai dar continuidade."
+                    )
                 },
                 {"role": "user", "content": mensagem_cliente}
             ]
@@ -35,7 +44,10 @@ def responder():
         resposta_texto = resposta['choices'][0]['message']['content']
     except Exception as e:
         print(f"Erro na OpenAI: {e}")
-        resposta_texto = "Estamos passando por instabilidades no atendimento automático. Nossa equipe humana dará continuidade em breve."
+        resposta_texto = (
+            "Estamos passando por instabilidades no atendimento automático. "
+            "Nossa equipe humana dará continuidade em breve."
+        )
 
     try:
         requests.post(ZAPI_URL, json={
