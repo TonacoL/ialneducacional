@@ -14,7 +14,7 @@ ZAPI_URL = os.getenv('ZAPI_URL')
 @app.route('/webhook', methods=['POST'])
 def responder():
     data = request.json
-    print("Recebido no webhook:", data)  # DEBUG: log da requisição
+    print("Recebido no webhook:", data)
 
     if not data:
         return {"error": "Nenhum dado JSON recebido"}, 400
